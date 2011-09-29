@@ -5,6 +5,7 @@
 
 from argparse import *
 from csv import *
+from os import rename
 from random import *
 
 ap = ArgumentParser('Generate student Socratic callouts.')
@@ -71,6 +72,9 @@ for i in range(args.callouts):
     total_weight += s.weight
     print('%02d: %02d %s' % (i + 1, s.index, s.name))
 
-csv = writer(open(args.statefile + '.new', 'w'))
+newfile = args.statefile + '.new'
+csv = writer(open(newfile, 'w'))
 for s in socrates:
     csv.writerow(s.row())
+rename(args.statefile, args.statefile + '.bak')
+rename(newfile, args.statefile)
