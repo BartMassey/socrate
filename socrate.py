@@ -81,7 +81,7 @@ with open(args.calloutfile, 'w') as cf:
         total_weight -= s.weight
         s.call_on()
         total_weight += s.weight
-        cf.print('%02d: %02d %s' % (i + 1, s.index, s.name))
+        cf.write('%02d: %02d %s\n' % (i + 1, s.index, s.name))
 
 # Write the new state file and clean up
 newfile = args.statefile + '.new'

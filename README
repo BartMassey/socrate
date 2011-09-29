@@ -20,8 +20,8 @@ socrate.txt containing lines of the form
 The index should be some kind of student index.
 Invoke via
 
-  python socrate.py 60 >callouts.txt
+  python socrate.py 60
 
 The state file will be automatically updated so that the
 next callouts will be appropriately weighted, and the
-callouts will be generated into the output file.
+callouts will be generated into the file callouts.txt.
