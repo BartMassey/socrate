@@ -3,18 +3,23 @@
 # Emit an infinite stream of weighted random
 # student selections based on past history data.
 
+# Bring in necessary modules
 from argparse import *
 from csv import *
 from os import rename
 from random import *
 
+# Parse arguments
 ap = ArgumentParser('Generate student Socratic callouts.')
 ap.add_argument('callouts', type=int,
                 help='how many callouts to generate')
 ap.add_argument('--statefile', default='socrate.txt',
                 help='Socrate state file')
+ap.add_argument('--calloutfile', default='callout.txt',
+                help='Socrate callout file')
 args = ap.parse_args()
 
+# Define class for individual students
 class Socrate:
     index = None
     first = None
@@ -51,6 +56,7 @@ class Socrate:
                 str(self.count_failed),
                 str(self.count_absent)]
 
+# Read in the statefile and calculate total weight
 socrates = []
 total_weight = 0.0
 csv = reader(open(args.statefile, 'r'))
@@ -59,19 +65,22 @@ for line in csv:
     socrates += [s]
     total_weight += s.weight
 
-seed()
-for i in range(args.callouts):
-    target_weight = uniform(0.0, total_weight)
-    for s in socrates:
-        target_weight -= s.weight
-        if target_weight <= 0.0:
-            break
-    assert target_weight <= 0.0, "internal error: fell off end"
-    total_weight -= s.weight
-    s.call_on()
-    total_weight += s.weight
-    print('%02d: %02d %s' % (i + 1, s.index, s.name))
+# Emit weighted random callouts to the callout file
+with open(args.calloutfile, 'w') as cf:
+    seed()
+    for i in range(args.callouts):
+        target_weight = uniform(0.0, total_weight)
+        for s in socrates:
+            target_weight -= s.weight
+            if target_weight <= 0.0:
+                break
+        assert target_weight <= 0.0, "internal error: fell off end"
+        total_weight -= s.weight
+        s.call_on()
+        total_weight += s.weight
+        cf.print('%02d: %02d %s' % (i + 1, s.index, s.name))
 
+# Write the new state file and clean up
 newfile = args.statefile + '.new'
 csv = writer(open(newfile, 'w'))
 for s in socrates:
