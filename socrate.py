@@ -44,6 +44,12 @@ class Socrate:
         self.count_called += 1
         self.calc_weight()
 
+    def row(self):
+        return [str(self.index), self.last, self.first,
+                str(self.count_called),
+                str(self.count_failed),
+                str(self.count_absent)]
+
 socrates = []
 total_weight = 0.0
 csv = reader(open(args.statefile, 'r'))
@@ -63,4 +69,8 @@ for i in range(args.callouts):
     total_weight -= s.weight
     s.call_on()
     total_weight += s.weight
-    print('%d: %d %s' % (i + 1, s.index, s.name))
+    print('%02d: %02d %s' % (i + 1, s.index, s.name))
+
+csv = writer(open(args.statefile + '.new', 'w'))
+for s in socrates:
+    csv.writerow(s.row())
