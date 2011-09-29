@@ -1,0 +1,27 @@
+Socrate - a "Socratic Method" callout generator
+Copyright © 2011 Bart Massey
+
+
+Socrate is a "Socratic Method" teaching tool. It generates a
+list of random "callouts" from a student list. During class,
+students are chosen to be called upon in list order. The
+list is generated weighted-randomly, such that a student who
+has been called upon relatively more is relatively less
+likely to be called next.
+
+Socrate is written in Python, and available as open source
+under the MIT license.
+
+To use the tool, first prepare a CSV state file called
+socrate.txt containing lines of the form
+
+  index,last,first,0,0,0
+
+The index should be some kind of student index.
+Invoke via
+
+  python socrate.py 60 >callouts.txt
+
+The state file will be automatically updated so that the
+next callouts will be appropriately weighted, and the
+callouts will be generated into the output file.
