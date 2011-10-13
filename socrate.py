@@ -44,15 +44,18 @@ class Socrate:
         self.count_absent = int(count_absent_str)
         self.calc_weight()
 
+    # Calculate a heuristic weight for the student
     def calc_weight(self):
         self.weight = \
           (1.0 + 0.5 * self.count_failed + 2 * self.count_absent) / \
           (self.count_called + 1) ** 2.0
 
+    # Mark the student as "called on" and recalc their weight
     def call_on(self):
         self.count_called += 1
         self.calc_weight()
 
+    # Return a string describing the student's current state
     def row(self):
         return [str(self.index), self.last, self.first,
                 str(self.count_called),
