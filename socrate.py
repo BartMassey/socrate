@@ -11,12 +11,18 @@ from argparse import *
 from csv import *
 from os import rename
 from random import *
+from time import ctime
 from tkinter import *
+
+# Width of student text display in chars
+display_width = 35
 
 # Parse arguments
 ap = ArgumentParser("Generate student 'Socratic' callouts.")
 ap.add_argument("--statefile", default="socrate.txt",
                 help="Socrate state file")
+ap.add_argument("--logfile", default="socrate-log.txt",
+                help="Socrate log file")
 args = ap.parse_args()
 
 class Student:
@@ -43,67 +49,135 @@ class Student:
 
     def weight(self):
         "Calculate a heuristic weight for the student. Returns a weight."
-        return
+        return \
           (1.0 + 0.5 * self.count_failed + 2 * self.count_absent) / \
           (self.count_called + 1) ** 2.0
 
     def call_on(self):
-        "Mark the student as "called on" and recalc their weight"
+        "Mark the student as 'called on'"
         self.count_called += 1
-        self.calc_weight()
+
+    def mark_absent(self):
+        "Mark the student as absent"
+        self.count_absent += 1
+
+    def mark_failed(self):
+        "Mark the student as 'failed to answer'"
+        self.count_failed += 1
 
     def row(self):
-        "Return a string describing the student's current state"
+        "Return a list of strings describing the student's current state"
         return [str(self.index), self.last, self.first,
                 str(self.count_called),
                 str(self.count_failed),
                 str(self.count_absent)]
 
+    def fullname(self):
+        return self.first + " " + self.last
+
+    def index_str(self):
+        return self.fullname() + " (" + str(self.index) + ")"
+
 class Socrate(Frame):
     "GUI app for doing callouts"
 
-    def __init__(self, statefile_name):
-        "Read in the statefile."
+    def __init__(self, root, statefile_name, logfile_name):
+        """
+        Read in the statefile and open the logfile. Set up
+        the GUI.
+        """
+        global display_width
+        # Read in the statefile.
         self.statefile_name = statefile_name
-        self.socrates = []
+        self.students = []
         csv = reader(open(self.statefile_name, 'r'))
         for line in csv:
             s = Student(line)
-            self.socrates += [s]
+            self.students += [s]
+        # Set up the logfile.
+        self.logfile_name = logfile_name
+        self.logfile = open(self.logfile_name, 'a')
+        self.log("started")
+        # Set up the GUI.
+        super(Socrate, self).__init__(root)
+        self.grid(sticky = N + S)
+        callout = Button(self,
+                         text = "Call",
+                         command = self.do_callout)
+        callout.grid()
+        self.display = Label(self,
+                             text = '-' * display_width,
+                             font = ("Andale Mono", "16"))
+        self.display.grid(row = 0, column = 1, sticky = N + S)
+
+    def do_callout(self):
+        "Call out a student and display the result."
+        s = self.callout()
+        self.display_student(s)
+        
+    def display_student(self, student):
+        global display_width
+        text = student.index_str() + ' ' * display_width
+        self.display.configure(text = text[0:display_width])
+
+    def log(self, message, student = None):
+        "Log the given student and message, with a timestamp."
+        self.logfile.write(ctime() + ": " + message)
+        if student != None:
+            self.logfile.write(" " + student.index_str())
+        self.logfile.write("\n")
+        self.logfile.flush()
 
     def total_weight(self):
         "Calculate current total weight. Returns a weight."
         total_weight = 0
-        for s in self.socrates:
+        for s in self.students:
             total_weight += s.weight()
         return total_weight
         
 
     def callout(self):
-        "Call out a student. Returns a Student."
+        "Call out a student. Log the callout. Returns a Student."
         target_weight = uniform(0.0, self.total_weight())
-        for s in self.socrates:
+        for s in self.students:
             target_weight -= s.weight()
             if target_weight <= 0.0:
                 break
         assert target_weight <= 0.0, "internal error: fell off end"
-        self.log()
+        self.log("called", s)
+        s.call_on()
+        return s
 
+    def absent(self, s):
+        "Mark the student absent. Log the mark."
+        s.mark_absent()
+        self.log("absent", s)
+
+    def failed(self, s):
+        "Mark the student failed. Log the mark."
+        s.mark_failed()
+        self.log("failed", s)
 
     def close(self):
         "Write the new state file and clean up."
         newfile = self.statefile_name + '.new'
         csv = writer(open(newfile, 'w'))
-        for s in socrates:
+        for s in self.students:
             csv.writerow(s.row())
         rename(self.statefile_name, self.statefile_name + '.bak')
         rename(newfile, self.statefile_name)
+        self.log("finished")
+        self.logfile.close()
 
 # Seed the PRNG.
 seed()
 
 # Start the app.
-app = Socrate(args.statefile)
+root = Tk()
+root.title("Socrate")
+app = Socrate(root, args.statefile, args.logfile)
+root.mainloop()
+app.close()
 
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated
