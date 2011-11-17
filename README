@@ -2,12 +2,19 @@ Socrate - a "Socratic Method" callout generator
 Copyright © 2011 Bart Massey
 
 
-Socrate is a "Socratic Method" teaching tool. It generates a
-list of random "callouts" from a student list. During class,
-students are chosen to be called upon in list order. The
-list is generated weighted-randomly, such that a student who
-has been called upon relatively more is relatively less
-likely to be called next.
+Socrate is a "Socratic Method" teaching tool. It presents a
+very simple GUI for picking "callouts" from a student
+list. During class, the "Call" button is used to select a
+student to call on. The student is picked weighted-randomly,
+such that a student who has been called upon relatively more
+over time is relatively less likely to be called
+next. Further, the tool will not call on a student twice in
+the same session.  (This is a bug for small classes,
+especially since it currently crashes when it has run out of
+students. For larger classes it is quite nice.) Once a
+student has been called, the tool provides buttons for the
+instructor to record the response: "Absent", "D/K" (Didn't
+Know, chosen as something gentle and noncommittal), and "OK".
 
 Socrate is written in Python, and available as open source
 under the MIT license.
@@ -17,11 +24,16 @@ socrate.txt containing lines of the form
 
   index,last,first,0,0,0
 
-The index should be some kind of student index.
-Invoke via
+The index should be some kind of student index: I use the
+index number from our student records. Don't use a private
+number like an SSN as it is displayed in the tool. The
+numbers in the line are the number of times the student was
+called, number of times the student was absent when called,
+and number of times the student failed to answer
+successfully when called. This file can be imported into a
+spreadsheet or edited directly (obviously).
 
-  python socrate.py 60
-
-The state file will be automatically updated so that the
-next callouts will be appropriately weighted, and the
-callouts will be generated into the file callouts.txt.
+By default, the tool will use "socrate.txt" as the
+statefile, and will log all events to
+"socrate-log.txt". Both of these files can be changed via
+command-line arguments.
