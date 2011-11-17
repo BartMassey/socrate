@@ -105,9 +105,7 @@ class Socrate(Frame):
                          text = "Call",
                          command = self.do_callout)
         callout.grid()
-        self.display = Label(self,
-                             text = '-' * display_width,
-                             font = ("Andale Mono", "16"))
+        self.display = Label(self, width = display_width)
         self.display.grid(row = 0, column = 1, sticky = N + S)
 
     def do_callout(self):
@@ -116,9 +114,8 @@ class Socrate(Frame):
         self.display_student(s)
         
     def display_student(self, student):
-        global display_width
-        text = student.index_str() + ' ' * display_width
-        self.display.configure(text = text[0:display_width])
+        self.display.configure(text = student.index_str(),
+                               justify = LEFT)
 
     def log(self, message, student = None):
         "Log the given student and message, with a timestamp."
