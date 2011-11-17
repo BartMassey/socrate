@@ -27,14 +27,6 @@ args = ap.parse_args()
 
 class Student:
     "Individual student data."
-    index = None
-    first = None
-    last = None
-    name = None
-    count_called = None
-    count_failed = None
-    count_absent = None
-    weight = None
 
     def __init__(self, fields):
         "Initialize a list of fields (from a CSV file)."
@@ -53,7 +45,7 @@ class Student:
           (1.0 + 0.5 * self.count_failed + 2 * self.count_absent) / \
           (self.count_called + 1) ** 2.0
 
-    def call_on(self):
+    def mark_called(self):
         "Mark the student as 'called on'"
         self.count_called += 1
 
@@ -90,6 +82,7 @@ class Socrate(Frame):
         # Read in the statefile.
         self.statefile_name = statefile_name
         self.students = []
+        self.callouts = {}
         csv = reader(open(self.statefile_name, 'r'))
         for line in csv:
             s = Student(line)
@@ -186,6 +179,8 @@ class Socrate(Frame):
         "Calculate current total weight. Returns a weight."
         total_weight = 0
         for s in self.students:
+            if s.index in self.callouts:
+                continue
             total_weight += s.weight()
         return total_weight
         
@@ -194,12 +189,15 @@ class Socrate(Frame):
         "Call out a student. Log the callout. Returns a Student."
         target_weight = uniform(0.0, self.total_weight())
         for s in self.students:
+            if s.index in self.callouts:
+                continue
             target_weight -= s.weight()
             if target_weight <= 0.0:
                 break
         assert target_weight <= 0.0, "internal error: fell off end"
         self.log("called", s)
-        s.call_on()
+        self.callouts[s.index] = True
+        s.mark_called()
         return s
 
     def close(self):
