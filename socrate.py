@@ -100,22 +100,79 @@ class Socrate(Frame):
         self.log("started")
         # Set up the GUI.
         super(Socrate, self).__init__(root)
-        self.grid(sticky = N + S)
-        callout = Button(self,
-                         text = "Call",
-                         command = self.do_callout)
-        callout.grid()
+        self.grid()
+        self.call = Button(self,
+                           text = "Call",
+                           command = self.do_callout)
+        self.call.grid(row = 0, column = 0, sticky = E + W)
+        self.ok = Button(self,
+                         text = "OK",
+                         command = self.do_ok)
+        self.ok.grid(row = 1, column = 0, sticky = E + W)
+        self.absent = Button(self,
+                             text = "Absent",
+                             command = self.do_absent)
+        self.absent.grid(row = 2, column = 0, sticky = E + W)
+        self.failed = Button(self,
+                             text = "D/K",
+                             command = self.do_failed)
+        self.failed.grid(row = 3, column = 0, sticky = E + W)
         self.display = Label(self, width = display_width)
-        self.display.grid(row = 0, column = 1, sticky = N + S)
+        self.display.grid(row = 0, column = 1)
+        self.student = None
+        self.update_gui()
+
+    def configure_result_buttons(self, state):
+        "Set the result buttons to the given state."
+        self.ok.configure(state = state)
+        self.absent.configure(state = state)
+        self.failed.configure(state = state)
+
+    def update_gui(self):
+        if self.student == None:
+            self.call.configure(state = NORMAL)
+            self.configure_result_buttons(DISABLED)
+        else:
+            self.call.configure(state = DISABLED)
+            self.configure_result_buttons(NORMAL)
+        self.display_student()
 
     def do_callout(self):
         "Call out a student and display the result."
-        s = self.callout()
-        self.display_student(s)
-        
-    def display_student(self, student):
-        self.display.configure(text = student.index_str(),
-                               justify = LEFT)
+        if self.student != None:
+            return
+        self.student = self.callout()
+        self.update_gui()
+
+    def do_ok(self):
+        "Prepare for the next student."
+        self.student = None
+        self.update_gui()
+
+    def do_absent(self):
+        "Mark the student absent. Log the mark."
+        if self.student == None:
+            return
+        self.student.mark_absent()
+        self.log("absent", self.student)
+        self.student = None
+        self.update_gui()
+
+    def do_failed(self):
+        "Mark the student failed. Log the mark."
+        if self.student == None:
+            return
+        self.student.mark_failed()
+        self.log("failed", self.student)
+        self.student = None
+        self.update_gui()
+
+    def display_student(self):
+        if self.student == None:
+            text = ""
+        else:
+            text = self.student.index_str()
+        self.display.configure(text = text, justify = LEFT)
 
     def log(self, message, student = None):
         "Log the given student and message, with a timestamp."
@@ -144,16 +201,6 @@ class Socrate(Frame):
         self.log("called", s)
         s.call_on()
         return s
-
-    def absent(self, s):
-        "Mark the student absent. Log the mark."
-        s.mark_absent()
-        self.log("absent", s)
-
-    def failed(self, s):
-        "Mark the student failed. Log the mark."
-        s.mark_failed()
-        self.log("failed", s)
 
     def close(self):
         "Write the new state file and clean up."
