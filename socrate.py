@@ -33,7 +33,6 @@ class Student:
         assert len(fields) == 6, 'bad list in initializer: ' + str(fields)
         [index_str, self.last, self.first,
          count_called_str, count_failed_str, count_absent_str] = fields
-        self.name = self.first + ' ' + self.last
         self.index = int(index_str)
         self.count_called = int(count_called_str)
         self.count_failed = int(count_failed_str)
@@ -121,6 +120,13 @@ class Socrate(Frame):
         self.absent.configure(state = state)
         self.failed.configure(state = state)
 
+    def display_student(self):
+        if self.student == None:
+            text = ""
+        else:
+            text = self.student.index_str()
+        self.display.configure(text = text, justify = LEFT)
+
     def update_gui(self):
         if self.student == None:
             self.call.configure(state = NORMAL)
@@ -135,15 +141,17 @@ class Socrate(Frame):
         if self.student != None:
             return
         self.student = self.callout()
+        self.log("called", self.student)
         self.update_gui()
 
     def do_ok(self):
         "Prepare for the next student."
+        self.log("ok", self.student)
         self.student = None
         self.update_gui()
 
     def do_absent(self):
-        "Mark the student absent. Log the mark."
+        "Mark the student absent."
         if self.student == None:
             return
         self.student.mark_absent()
@@ -152,20 +160,13 @@ class Socrate(Frame):
         self.update_gui()
 
     def do_failed(self):
-        "Mark the student failed. Log the mark."
+        "Mark the student failed."
         if self.student == None:
             return
         self.student.mark_failed()
         self.log("failed", self.student)
         self.student = None
         self.update_gui()
-
-    def display_student(self):
-        if self.student == None:
-            text = ""
-        else:
-            text = self.student.index_str()
-        self.display.configure(text = text, justify = LEFT)
 
     def log(self, message, student = None):
         "Log the given student and message, with a timestamp."
@@ -178,10 +179,14 @@ class Socrate(Frame):
     def total_weight(self):
         "Calculate current total weight. Returns a weight."
         total_weight = 0
-        for s in self.students:
-            if s.index in self.callouts:
-                continue
-            total_weight += s.weight()
+        while True:
+            for s in self.students:
+                if s.index in self.callouts:
+                    continue
+                total_weight += s.weight()
+            if total_weight > 0:
+                break
+            self.callouts = {}
         return total_weight
         
 

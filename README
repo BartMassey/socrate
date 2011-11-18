@@ -8,13 +8,12 @@ list. During class, the "Call" button is used to select a
 student to call on. The student is picked weighted-randomly,
 such that a student who has been called upon relatively more
 over time is relatively less likely to be called
-next. Further, the tool will not call on a student twice in
-the same session.  (This is a bug for small classes,
-especially since it currently crashes when it has run out of
-students. For larger classes it is quite nice.) Once a
-student has been called, the tool provides buttons for the
-instructor to record the response: "Absent", "D/K" (Didn't
-Know, chosen as something gentle and noncommittal), and "OK".
+next. Further, the tool will not call on a student again in
+the same session until all students have been called on in
+that session. Once a student has been called, the tool
+provides buttons for the instructor to record the response:
+"Absent", "D/K" (Didn't Know, chosen as something gentle and
+noncommittal), and "OK".
 
 Socrate is written in Python, and available as open source
 under the MIT license.
