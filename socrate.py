@@ -111,10 +111,12 @@ class Socrate(Frame):
         self.statefile_name = statefile_name
         self.students = []
         self.callouts = {}
-        csv = reader(open(self.statefile_name, 'r'))
+        statefile = open(self.statefile_name, 'r', newline="")
+        csv = reader(statefile)
         for line in csv:
             s = Student(line)
             self.students += [s]
+        statefile.close()
         # Set up the logfile.
         self.logfile_name = logfile_name
         self.logfile = open(self.logfile_name, 'a')
@@ -236,7 +238,7 @@ class Socrate(Frame):
     def close(self):
         "Write the new state file and clean up."
         newfile = self.statefile_name + '.new'
-        csvfile = open(newfile, 'w')
+        csvfile = open(newfile, 'w', newline="")
         csv = writer(csvfile)
         for s in self.students:
             csv.writerow(s.row())
