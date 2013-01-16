@@ -6,8 +6,19 @@
 # GUI for random student selection based on past history
 # data.
 
+# Deal with Python creep
+from sys import version_info
+# http://stackoverflow.com/questions/446052/
+if version_info < (3, 0):
+    raise "Must use Python 3.0 or later"
+if version_info < (3, 2):
+    compat = True
+    from optparse import OptionParser
+else:
+    compat = False
+    from argparse import ArgumentParser
+
 # Bring in necessary modules
-from argparse import *
 from csv import *
 from os import rename
 from random import *
@@ -18,12 +29,21 @@ from tkinter import *
 display_width = 35
 
 # Parse arguments
-ap = ArgumentParser("Generate student 'Socratic' callouts.")
-ap.add_argument("--statefile", default="socrate.txt",
-                help="Socrate state file")
-ap.add_argument("--logfile", default="socrate-log.txt",
-                help="Socrate log file")
-args = ap.parse_args()
+if compat:
+    # from Python docs
+    parser = OptionParser()
+    parser.add_option("--statefile", default="socrate.txt",
+                      help="Socrate state file")
+    parser.add_option("--logfile", default="socrate-log.txt",
+                      help="Socrate log file")
+    (args, []) = parser.parse_args()
+else:
+    ap = ArgumentParser("Generate student 'Socratic' callouts.")
+    ap.add_argument("--statefile", default="socrate.txt",
+                    help="Socrate state file")
+    ap.add_argument("--logfile", default="socrate-log.txt",
+                    help="Socrate log file")
+    args = ap.parse_args()
 
 class Student:
     "Individual student data."
