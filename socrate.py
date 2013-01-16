@@ -141,7 +141,6 @@ class Socrate(Frame):
         if self.student != None:
             return
         self.student = self.callout()
-        self.log("called", self.student)
         self.update_gui()
 
     def do_ok(self):
