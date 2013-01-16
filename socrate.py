@@ -20,10 +20,19 @@ else:
 
 # Bring in necessary modules
 from csv import *
-from os import rename
+from os import rename, remove
+from errno import ENOENT
 from random import *
 from time import ctime
 from tkinter import *
+
+# http://stackoverflow.com/questions/10840533/
+def forceremove(filename):
+    try:
+        remove(filename)
+    except OSError as e:
+        if e.errno != ENOENT: # ENOENT = no such file or directory
+            raise # re-raise exception if a different error occured
 
 # Width of student text display in chars
 display_width = 35
@@ -227,10 +236,14 @@ class Socrate(Frame):
     def close(self):
         "Write the new state file and clean up."
         newfile = self.statefile_name + '.new'
-        csv = writer(open(newfile, 'w'))
+        csvfile = open(newfile, 'w')
+        csv = writer(csvfile)
         for s in self.students:
             csv.writerow(s.row())
-        rename(self.statefile_name, self.statefile_name + '.bak')
+        csvfile.close()
+        bakfile = self.statefile_name + '.bak'
+        forceremove(bakfile)
+        rename(self.statefile_name, bakfile)
         rename(newfile, self.statefile_name)
         self.log("finished")
         self.logfile.close()
