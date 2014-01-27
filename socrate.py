@@ -176,6 +176,7 @@ class Socrate(Frame):
 
     def do_ok(self):
         "Prepare for the next student."
+        self.student.mark_called()
         self.log("ok", self.student)
         self.student = None
         self.update_gui()
@@ -184,6 +185,7 @@ class Socrate(Frame):
         "Mark the student absent."
         if self.student == None:
             return
+        self.student.mark_called()
         self.student.mark_absent()
         self.log("absent", self.student)
         self.student = None
@@ -193,6 +195,7 @@ class Socrate(Frame):
         "Mark the student failed."
         if self.student == None:
             return
+        self.student.mark_called()
         self.student.mark_failed()
         self.log("failed", self.student)
         self.student = None
@@ -232,7 +235,6 @@ class Socrate(Frame):
         assert target_weight <= 0.0, "internal error: fell off end"
         self.log("called", s)
         self.callouts[s.index] = True
-        s.mark_called()
         return s
 
     def close(self):
